@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from mainapp.models import City, Street
+from mainapp.models import City, Street, Shop
 
 
 class CitySerializer(serializers.Serializer):
@@ -22,3 +22,21 @@ class StreetSerializer(serializers.Serializer):
         model = Street
         fields = '__all__'
 
+
+
+class ShopSerializer(serializers.Serializer):
+
+    name = serializers.CharField(max_length=255, allow_null=False, allow_blank=False)
+    city = serializers.CharField(source='street.city_name')
+    street = serializers.CharField(source='street.name')
+    apartment = serializers.CharField(max_length=255, allow_null=False, allow_blank=False)
+    open_time = serializers.DateTimeField()
+    close_time = serializers.DateTimeField()
+
+    def create(self, validated_data):
+        instance, _ = Shop.objects.get_or_create(**validated_data)
+        return instance
+
+    class Meta:
+        model = Shop
+        fields = '__all__'
