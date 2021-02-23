@@ -12,8 +12,11 @@ class City(models.Model):
 
 
 class Street(models.Model):
-    street = models.CharField(max_length=255, null=False, blank=False)
+    name = models.CharField(max_length=255, null=False, blank=False)
     city = models.ForeignKey(City, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.name}'
 
 
 class Shop(models.Model):
@@ -22,3 +25,6 @@ class Shop(models.Model):
     apartment = models.CharField(max_length=255, null=False, blank=False)
     open_time = models.DateTimeField()
     close_time = models.DateTimeField()
+
+    def __str__(self):
+        return f'{self.name}'
