@@ -23,15 +23,14 @@ class StreetSerializer(serializers.Serializer):
         fields = '__all__'
 
 
-
 class ShopSerializer(serializers.Serializer):
 
     name = serializers.CharField(max_length=255, allow_null=False, allow_blank=False)
-    city = serializers.CharField(source='street.city_name')
-    street = serializers.CharField(source='street.name')
+    city = CitySerializer(read_only=True)
+    street = StreetSerializer(read_only=True)
     apartment = serializers.CharField(max_length=255, allow_null=False, allow_blank=False)
-    open_time = serializers.DateTimeField()
-    close_time = serializers.DateTimeField()
+    open_time = serializers.TimeField()
+    close_time = serializers.TimeField()
 
     def create(self, validated_data):
         instance, _ = Shop.objects.get_or_create(**validated_data)
@@ -40,3 +39,7 @@ class ShopSerializer(serializers.Serializer):
     class Meta:
         model = Shop
         fields = '__all__'
+
+
+class ShopListSerializer(serializers.Serializer):
+    ShopSerializer(many=True, source='shop_set')

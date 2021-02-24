@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class City(models.Model):
@@ -21,10 +22,14 @@ class Street(models.Model):
 
 class Shop(models.Model):
     name = models.CharField(max_length=255, null=False, blank=False)
-    street = models.CharField(max_length=255, null=False, blank=False)
+    street = models.ForeignKey(Street, on_delete=models.CASCADE)
     apartment = models.CharField(max_length=255, null=False, blank=False)
-    open_time = models.DateTimeField()
-    close_time = models.DateTimeField()
+    open_time = models.TimeField()
+    close_time = models.TimeField()
+
+    def is_open(self):
+        now = timezone.now().time()
+        return self.close_time > now > self.open_time
 
     def __str__(self):
         return f'{self.name}'

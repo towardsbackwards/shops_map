@@ -1,9 +1,9 @@
-from rest_framework import generics
-from rest_framework.generics import get_object_or_404
+from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from mainapp.models import City, Street, Shop
-from mainapp.serializers import CitySerializer, StreetSerializer, ShopSerializer
+from mainapp.serializers import CitySerializer, StreetSerializer, ShopSerializer, ShopListSerializer
 
 
 class CitiesList(generics.ListAPIView):
@@ -20,19 +20,24 @@ class StreetList(generics.ListAPIView):
         return streets
 
 
-class ShopCreate(generics.CreateAPIView):
+class ShopList(generics.ListAPIView):
+    serializer_class = ShopSerializer
+    queryset = Shop.objects.all()
+
+    def get_queryset(self):
+        city, street = self.request.query_params.get('city'), self.request.query_params.get('street')
+        is_open = self.request.query_params.get('open')
+        Shops = Shop.objects.filter(street__city_id=city, street=street)
+        return Shops
+
+
+class ShopCreate(APIView):
     serializer_class = ShopSerializer
 
     def post(self, request, *args, **kwargs):
         queryset = Shop.objects.create(user=request.user)
         serializer = ShopSerializer(queryset, data=request.data)
         if serializer.is_valid():
-            return Response({'serializer': serializer, 'queryset': queryset})
-
-        serializer.save()
-    #
-    #     return redirect('/api/v1/cars/usercars/')
-    #
-    # def perform_create(self, serializer):
-    #     author = get_object_or_404(Shop, id=self.request.data.get('author_id'))
-    #     return serializer.save(author=author)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
