@@ -39,7 +39,3 @@ class ShopSerializer(serializers.Serializer):
     class Meta:
         model = Shop
         fields = '__all__'
-
-
-class ShopListSerializer(serializers.Serializer):
-    ShopSerializer(many=True, source='shop_set')

@@ -1,9 +1,9 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from django.utils import timezone
 from mainapp.models import City, Street, Shop
-from mainapp.serializers import CitySerializer, StreetSerializer, ShopSerializer, ShopListSerializer
+from mainapp.serializers import CitySerializer, StreetSerializer, ShopSerializer
 
 
 class CitiesList(generics.ListAPIView):
@@ -25,10 +25,22 @@ class ShopList(generics.ListAPIView):
     queryset = Shop.objects.all()
 
     def get_queryset(self):
-        city, street = self.request.query_params.get('city'), self.request.query_params.get('street')
-        is_open = self.request.query_params.get('open')
-        Shops = Shop.objects.filter(street__city_id=city, street=street)
-        return Shops
+        city, street, is_open = self.request.GET.get('city'), \
+                                self.request.GET.get('street'), \
+                                self.request.GET.get('open')
+        shops = None
+        if is_open == '1':
+            shops = Shop.objects.filter(street__city_id=city,
+                                        street=street,
+                                        open_time__lt=timezone.now().time(),
+                                        close_time__gt=timezone.now().time())
+        elif is_open == '0':
+            shops = Shop.objects.filter(street__city_id=city,
+                                        street=street,
+                                        open_time__gt=timezone.now().time(),
+                                        close_time__lt=timezone.now().time())
+
+        return shops
 
 
 class ShopCreate(APIView):

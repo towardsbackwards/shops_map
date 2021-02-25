@@ -27,9 +27,5 @@ class Shop(models.Model):
     open_time = models.TimeField()
     close_time = models.TimeField()
 
-    def is_open(self):
-        now = timezone.now().time()
-        return self.close_time > now > self.open_time
-
     def __str__(self):
         return f'{self.name}'
